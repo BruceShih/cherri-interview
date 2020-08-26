@@ -1,0 +1,59 @@
+{
+  "friends": [
+    {
+      "id": 0,
+      "name": "保羅"
+    },
+    {
+      "id": 1,
+      "name": "傑克"
+    },
+    {
+      "id": 2,
+      "name": "傑森"
+    }
+  ],
+  "friendChats": [
+    {
+      "id": 0,
+      "message": "保羅",
+      "createDate": "2020-08-26T09:10:12.123Z"
+    },
+    {
+      "id": 1,
+      "message": "您好，我是潔西卡",
+      "createDate": "2020-08-26T09:10:13.012Z"
+    },
+    {
+      "id": 2,
+      "message": "我喜歡吃的食物有",
+      "createDate": "2020-08-26T09:10:14.201Z"
+    },
+    {
+      "id": 3,
+      "message": "各種巧克力口味的甜點",
+      "createDate": "2020-08-26T09:10:15.451Z"
+    }
+  ],
+  "friendNotes": [
+    {
+      "id": 0,
+      "message": "備忘訊息1",
+      "createDate": "2020-08-26T09:17:28.158Z"
+    },
+    {
+      "id": 1,
+      "message": "備忘訊息2",
+      "createDate": "2020-08-26T09:17:35.745Z"
+    }
+  ],
+  "conversations": [
+    {
+      "id": 0,
+      "friendId": 0,
+      "dateStarted": "2020-08-26T09:01:46.785Z",
+      "chats": [0, 1, 2, 3],
+      "notes": [0, 1]
+    }
+  ]
+}

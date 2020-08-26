@@ -19,10 +19,9 @@ const db = firebase.firestore();
 const auth = firebase.auth();
 
 // db collections
-const friendList = db.collection('friends');
-// const postsCollection = db.collection('posts')
-// const commentsCollection = db.collection('comments')
-// const likesCollection = db.collection('likes')
+const friends = db.collection('friends');
+const friendChats = db.collection('friendChats');
+const friendNotes = db.collection('friendNotes');
+const conversations = db.collection('conversations');
 
-// TODO: export collections as well
-export { db, auth, friendList };
+export { db, auth, friends, friendChats, friendNotes, conversations };
