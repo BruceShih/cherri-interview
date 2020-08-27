@@ -30,6 +30,13 @@
     </v-navigation-drawer>
 
     <v-app-bar app dark color="primary" extension-height="64">
+      <v-progress-linear
+        :active="loading"
+        :indeterminate="loading"
+        absolute
+        bottom
+        color="accent"
+      ></v-progress-linear>
       <template v-slot:extension v-if="currentFriend != null">
         <v-card
           class="d-flex justify-space-between align-center"
@@ -291,7 +298,7 @@
 </template>
 
 <script lang="ts">
-import { Component, Vue } from 'vue-property-decorator';
+import { Component, Vue, Watch } from 'vue-property-decorator';
 import { firestore } from 'firebase';
 import { db } from './plugins/firebase';
 import { Friend } from './data/friend';
@@ -305,6 +312,7 @@ import { FriendNote } from './data/friendNote';
   // }
 })
 export default class App extends Vue {
+  loading = false;
   searchMode = false;
   searchTerm = '';
   searchFound = false;
@@ -318,6 +326,11 @@ export default class App extends Vue {
   friendList: Friend[] = [];
   chats: FriendChat[] = [];
   notes: FriendNote[] = [];
+
+  @Watch('loading')
+  loadingHandler() {
+    console.log('loading: ' + this.loading);
+  }
 
   // event handlers
   friendClick(friend: Friend) {
@@ -352,7 +365,6 @@ export default class App extends Vue {
 
   onNotesMenuOpen() {
     this.notesMenuBelong = this.currentFriend;
-    console.log(this.notesMenuBelong);
   }
 
   changeLanguage() {
@@ -361,6 +373,8 @@ export default class App extends Vue {
 
   async sendMessage() {
     if (this.currentFriend != null) {
+      this.loading = true;
+
       let newId = 0;
       const friendRef = db
         .collection('friends')
@@ -379,9 +393,8 @@ export default class App extends Vue {
             })[0].id + 1;
         });
 
-      console.log(newId);
-
-      db.collection('friendChats')
+      await db
+        .collection('friendChats')
         .doc(newId + '')
         .set({
           id: newId,
@@ -397,11 +410,15 @@ export default class App extends Vue {
       // .catch(function(error) {
       //   console.error('Error writing document: ', error);
       // });
+
+      this.loading = false;
     }
   }
 
   async addNote() {
     if (this.currentFriend != null) {
+      this.loading = true;
+
       let newId = 0;
       const friendRef = db
         .collection('friends')
@@ -420,9 +437,8 @@ export default class App extends Vue {
             })[0].id + 1;
         });
 
-      console.log(newId);
-
-      db.collection('friendNotes')
+      await db
+        .collection('friendNotes')
         .doc(newId + '')
         .set({
           id: newId,
@@ -437,16 +453,21 @@ export default class App extends Vue {
       // .catch(function(error) {
       //   console.error('Error writing document: ', error);
       // });
+
+      this.loading = false;
     }
   }
 
   async deleteNote(note: FriendNote) {
     if (this.currentFriend != null) {
+      this.loading = true;
+
       const friendRef = db
         .collection('friends')
         .doc(this.currentFriend.id + '');
 
-      db.collection('friendNotes')
+      await db
+        .collection('friendNotes')
         .doc(note.id + '')
         .delete()
         .then(() => {
@@ -455,11 +476,15 @@ export default class App extends Vue {
       // .catch(function(error) {
       //   console.error('Error removing document: ', error);
       // });
+
+      this.loading = false;
     }
   }
 
   // data fetcher
   async getFriendList() {
+    this.loading = true;
+
     await db
       .collection('friends')
       .get()
@@ -468,9 +493,13 @@ export default class App extends Vue {
           return doc.data() as Friend;
         });
       });
+
+    this.loading = false;
   }
 
   async loadConversation(friend: Friend) {
+    this.loading = true;
+
     // get the ref of desired friend
     const friendRef = db.collection('friends').doc(friend.id + '');
     // get chats by friendRef
@@ -495,9 +524,13 @@ export default class App extends Vue {
           return doc.data() as FriendNote;
         });
       });
+
+    this.loading = false;
   }
 
   async loadConversationByRef(friendRef: firestore.DocumentReference) {
+    this.loading = true;
+
     // get chats by friendRef
     await db
       .collection('friendChats')
@@ -520,6 +553,8 @@ export default class App extends Vue {
           return doc.data() as FriendNote;
         });
       });
+
+    this.loading = false;
   }
 
   private highlight(words: string, query: string) {
