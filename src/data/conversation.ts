@@ -1,10 +1,12 @@
+import { firestore } from 'firebase';
+import { Friend } from './friend';
 import { FriendChat } from './friendChat';
 import { FriendNote } from './friendNote';
 
 export interface Conversation {
   id: number;
-  friendId: number;
-  dateStarted: Date;
-  chats: number[];
-  notes: number[];
+  friend: Friend;
+  dateStarted: firestore.Timestamp;
+  chats: FriendChat[];
+  notes: FriendNote[];
 }

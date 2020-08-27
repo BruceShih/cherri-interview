@@ -1,5 +1,7 @@
+import { firestore } from 'firebase';
+
 export interface FriendNote {
   id: number;
   message: string;
-  createDate: Date;
+  createDate: firestore.Timestamp;
 }
