@@ -2,6 +2,7 @@
   "app": {
     "welcomeMessage": "Welcome to Cherri Chat!",
     "friendListText": "Friend List",
+    "searchPlaceholderText": "Search messages...",
     "searchResultText": "{number} item(s)",
     "messagePlaceholderText": "Message",
     "addNoteButtonText": "Add"

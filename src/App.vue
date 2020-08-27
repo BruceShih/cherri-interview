@@ -19,7 +19,9 @@
               <v-list-item-title class="text-h6 font-weight-bold">
                 {{ friend.name }}
               </v-list-item-title>
-              <v-list-item-subtitle></v-list-item-subtitle>
+              <v-list-item-subtitle>
+                {{ friend.latestMessage }}
+              </v-list-item-subtitle>
             </v-list-item-content>
           </v-list-item>
           <v-divider></v-divider>
@@ -42,7 +44,12 @@
             <strong>{{ currentFriend.name }}</strong>
           </div>
           <div class="secondary primary--text">
-            <v-btn icon color="primary" @click="searchMode = !searchMode">
+            <v-btn
+              icon
+              color="primary"
+              :input-value="searchMode"
+              @click="searchMode = !searchMode"
+            >
               <v-icon>mdi-magnify</v-icon>
             </v-btn>
             <v-menu
@@ -73,21 +80,22 @@
                         class="rounded-0"
                         outlined
                         name="input-7-4"
-                        :label="$t('app.messagePlaceholderText')"
                         hide-details="auto"
+                        :label="$t('app.messagePlaceholderText')"
+                        v-model="newNote"
                       ></v-textarea>
                     </v-col>
                   </v-row>
                   <v-row>
                     <v-col>
-                      <v-btn block tile color="primary" dark>
+                      <v-btn block tile color="primary" dark @click="addNote">
                         {{ $t('app.addNoteButtonText') }}
                       </v-btn>
                     </v-col>
                   </v-row>
-                  <v-divider class="my-2"></v-divider>
-                  <v-row>
-                    <v-col>
+                  <v-row v-if="notes.length > 0">
+                    <v-col class="pb-0">
+                      <v-divider class="pb-4"></v-divider>
                       <v-card
                         class="mb-2"
                         outlined
@@ -104,7 +112,12 @@
                               <div class="overline mb-1">
                                 {{ note.createDate.toDate().toLocaleString() }}
                               </div>
-                              <v-btn x-small icon color="primary">
+                              <v-btn
+                                x-small
+                                icon
+                                color="primary"
+                                @click="deleteNote(note)"
+                              >
                                 <v-icon>mdi-close</v-icon>
                               </v-btn>
                             </div>
@@ -188,6 +201,7 @@
           clearable
           clear-icon="mdi-close-circle"
           height="64px"
+          :label="$t('app.searchPlaceholderText')"
           :suffix="
             searchFound
               ? $t('app.searchResultText', { number: searchResultCount })
@@ -267,6 +281,8 @@
           flat
           append-icon="mdi-send"
           height="64px"
+          @click:append="sendMessage"
+          v-if="currentFriend != null"
         >
         </v-text-field>
       </v-card>
@@ -276,6 +292,7 @@
 
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator';
+import { firestore } from 'firebase';
 import { db } from './plugins/firebase';
 import { Friend } from './data/friend';
 import { FriendChat } from './data/friendChat';
@@ -293,6 +310,7 @@ export default class App extends Vue {
   searchFound = false;
   searchResultCount = 0;
   newMessage = '';
+  newNote = '';
   showFriendListDrawer = true;
   showNotesMenu = false;
   notesMenuBelong: Friend | null = null;
@@ -303,6 +321,12 @@ export default class App extends Vue {
 
   // event handlers
   friendClick(friend: Friend) {
+    // reset search form
+    this.searchMode = false;
+    this.searchTerm = '';
+    this.searchFound = false;
+    this.searchResultCount = 0;
+
     this.currentFriend = friend;
     this.loadConversation(friend);
   }
@@ -335,6 +359,105 @@ export default class App extends Vue {
     this.$i18n.locale = this.$i18n.locale == 'zh-TW' ? 'en' : 'zh-TW';
   }
 
+  async sendMessage() {
+    if (this.currentFriend != null) {
+      let newId = 0;
+      const friendRef = db
+        .collection('friends')
+        .doc(this.currentFriend.id + '');
+
+      // get a new chat id
+      await db
+        .collection('friendChats')
+        .orderBy('id', 'desc')
+        .limit(1)
+        .get()
+        .then(snapshot => {
+          newId =
+            snapshot.docs.map(doc => {
+              return doc.data() as FriendChat;
+            })[0].id + 1;
+        });
+
+      console.log(newId);
+
+      db.collection('friendChats')
+        .doc(newId + '')
+        .set({
+          id: newId,
+          message: this.newMessage,
+          type: 0,
+          createDate: firestore.Timestamp.now(),
+          friend: friendRef
+        })
+        .then(() => {
+          this.loadConversationByRef(friendRef);
+          this.newMessage = '';
+        });
+      // .catch(function(error) {
+      //   console.error('Error writing document: ', error);
+      // });
+    }
+  }
+
+  async addNote() {
+    if (this.currentFriend != null) {
+      let newId = 0;
+      const friendRef = db
+        .collection('friends')
+        .doc(this.currentFriend.id + '');
+
+      // get a new chat id
+      await db
+        .collection('friendNotes')
+        .orderBy('id', 'desc')
+        .limit(1)
+        .get()
+        .then(snapshot => {
+          newId =
+            snapshot.docs.map(doc => {
+              return doc.data() as FriendNote;
+            })[0].id + 1;
+        });
+
+      console.log(newId);
+
+      db.collection('friendNotes')
+        .doc(newId + '')
+        .set({
+          id: newId,
+          message: this.newNote,
+          createDate: firestore.Timestamp.now(),
+          friend: friendRef
+        })
+        .then(() => {
+          this.loadConversationByRef(friendRef);
+          this.newNote = '';
+        });
+      // .catch(function(error) {
+      //   console.error('Error writing document: ', error);
+      // });
+    }
+  }
+
+  async deleteNote(note: FriendNote) {
+    if (this.currentFriend != null) {
+      const friendRef = db
+        .collection('friends')
+        .doc(this.currentFriend.id + '');
+
+      db.collection('friendNotes')
+        .doc(note.id + '')
+        .delete()
+        .then(() => {
+          this.loadConversationByRef(friendRef);
+        });
+      // .catch(function(error) {
+      //   console.error('Error removing document: ', error);
+      // });
+    }
+  }
+
   // data fetcher
   async getFriendList() {
     await db
@@ -351,7 +474,31 @@ export default class App extends Vue {
     // get the ref of desired friend
     const friendRef = db.collection('friends').doc(friend.id + '');
     // get chats by friendRef
-    // this.$bind('chats', db.collection('friendChats').doc(friendId + ''));
+    await db
+      .collection('friendChats')
+      .where('friend', '==', friendRef)
+      .orderBy('createDate', 'desc')
+      .get()
+      .then(querySnapshot => {
+        this.chats = querySnapshot.docs.map(doc => {
+          return doc.data() as FriendChat;
+        });
+      });
+    // get notes by friendRef
+    await db
+      .collection('friendNotes')
+      .where('friend', '==', friendRef)
+      .orderBy('createDate', 'desc')
+      .get()
+      .then(querySnapshot => {
+        this.notes = querySnapshot.docs.map(doc => {
+          return doc.data() as FriendNote;
+        });
+      });
+  }
+
+  async loadConversationByRef(friendRef: firestore.DocumentReference) {
+    // get chats by friendRef
     await db
       .collection('friendChats')
       .where('friend', '==', friendRef)

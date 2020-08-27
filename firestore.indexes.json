@@ -1,0 +1,33 @@
+{
+  "indexes": [
+    {
+      "collectionGroup": "friendChats",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "friend",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "createDate",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "friendNotes",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "friend",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "createDate",
+          "order": "DESCENDING"
+        }
+      ]
+    }
+  ],
+  "fieldOverrides": []
+}

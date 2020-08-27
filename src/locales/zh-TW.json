@@ -2,6 +2,7 @@
   "app": {
     "welcomeMessage": "開始使用 Cherri Chat!",
     "friendListText": "好友列表",
+    "searchPlaceholderText": "搜尋訊息",
     "searchResultText": "{number} 則相符訊息",
     "messagePlaceholderText": "輸入訊息",
     "addNoteButtonText": "新增"

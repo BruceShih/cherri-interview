@@ -18,6 +18,8 @@ firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 const auth = firebase.auth();
 
+db.enablePersistence();
+
 // db collections
 const friends = db.collection('friends');
 const friendChats = db.collection('friendChats');
