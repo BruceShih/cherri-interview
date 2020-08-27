@@ -2,7 +2,9 @@
   <v-app id="cherri-chat">
     <v-navigation-drawer v-model="showFriendListDrawer" width="384px" app>
       <v-list three-line>
-        <v-subheader class="text-subtitle-1">好友列表(3)</v-subheader>
+        <v-subheader class="text-subtitle-1">
+          {{ `${$t('app.friendListText')}(${friendList.length})` }}
+        </v-subheader>
         <v-divider></v-divider>
         <v-list-item-group>
           <v-list-item
@@ -71,14 +73,16 @@
                         class="rounded-0"
                         outlined
                         name="input-7-4"
-                        label="輸入訊息..."
+                        :label="$t('app.messagePlaceholderText')"
                         hide-details="auto"
                       ></v-textarea>
                     </v-col>
                   </v-row>
                   <v-row>
                     <v-col>
-                      <v-btn block tile color="primary" dark>新增</v-btn>
+                      <v-btn block tile color="primary" dark>
+                        {{ $t('app.addNoteButtonText') }}
+                      </v-btn>
                     </v-col>
                   </v-row>
                   <v-divider class="my-2"></v-divider>
@@ -124,13 +128,12 @@
       <v-toolbar-title>Cherri Chat</v-toolbar-title>
       <v-spacer></v-spacer>
       <v-btn
-        class="mx-1"
+        class="primary--text mx-1"
+        depressed
         small
         rounded
-        outlined
         color="secondary"
-        :input-value="language == Language.Chinese"
-        @click="changeLanguage"
+        v-if="$i18n.locale == 'zh-TW'"
       >
         中文
       </v-btn>
@@ -138,10 +141,31 @@
         class="mx-1"
         small
         rounded
-        outlined
         color="secondary"
-        :input-value="language == Language.English"
+        outlined
         @click="changeLanguage"
+        v-else
+      >
+        中文
+      </v-btn>
+      <v-btn
+        class="primary--text mx-1"
+        depressed
+        small
+        rounded
+        color="secondary"
+        v-if="$i18n.locale == 'en'"
+      >
+        English
+      </v-btn>
+      <v-btn
+        class="mx-1"
+        small
+        rounded
+        color="secondary"
+        outlined
+        @click="changeLanguage"
+        v-else
       >
         English
       </v-btn>
@@ -164,7 +188,11 @@
           clearable
           clear-icon="mdi-close-circle"
           height="64px"
-          :suffix="searchFound ? `${searchResultCount}則相符訊息` : ''"
+          :suffix="
+            searchFound
+              ? $t('app.searchResultText', { number: searchResultCount })
+              : ''
+          "
           v-model="searchTerm"
           v-if="searchMode && currentFriend != null"
           @input="searchInputChange"
@@ -185,7 +213,7 @@
           >
           </v-img>
           <v-card-title class="primary--text text-h4">
-            開始使用 Cherri Chat!
+            {{ $t('app.welcomeMessage') }}
           </v-card-title>
         </v-card>
         <v-card
@@ -231,7 +259,7 @@
         <v-text-field
           class="border-top rounded-0 mt-auto"
           v-model="newMessage"
-          label="輸入訊息..."
+          :label="$t('app.messagePlaceholderText')"
           single-line
           full-width
           hide-details
@@ -303,7 +331,9 @@ export default class App extends Vue {
     console.log(this.notesMenuBelong);
   }
 
-  // changeLanguage() {}
+  changeLanguage() {
+    this.$i18n.locale = this.$i18n.locale == 'zh-TW' ? 'en' : 'zh-TW';
+  }
 
   // data fetcher
   async getFriendList() {

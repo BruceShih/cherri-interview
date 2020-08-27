@@ -16,6 +16,8 @@
       "webpack-env",
       "vuetify",
       "webpack",
+      "webpack-env",
+      "webpack",
       "webpack-env"
     ],
     "paths": {
